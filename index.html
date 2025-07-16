@@ -17,8 +17,8 @@
 
   <script>
     async function loadFeed() {
-      const url = "https://api.codetabs.com/v1/proxy?quest=https://www.reddit.com/user/genshinimpact/.rss";
-
+      //const url = "https://api.codetabs.com/v1/proxy?quest=https://www.reddit.com/user/genshinimpact/.rss";
+const url = "https://api-weld-kappa.vercel.app/api/reddit-rss"; 
       try {
         const res = await fetch(url);
         const text = await res.text();

@@ -1,63 +1,300 @@
 <!DOCTYPE html>
-<html lang="id">
+<html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Reddit Feed Genshin Impact</title>
-  <style>
-    body { font-family: sans-serif; background: #f0f0f0; padding: 20px; max-width: 800px; margin: auto; }
-    .post { background: #fff; padding: 15px; margin: 15px 0; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
-    .post img { max-width: 100%; border-radius: 8px; margin-top: 10px; }
-    .post h2 { margin: 0 0 10px; font-size: 18px; }
-    .post small { color: #666; }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Genshin Impact Reddit Feed</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #ff4500;
+            --secondary-color: #0066cc;
+            --background-color: #f5f5f5;
+            --card-color: #ffffff;
+            --text-color: #333333;
+            --meta-color: #666666;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            line-height: 1.6;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid var(--primary-color);
+        }
+
+        h1 {
+            color: var(--primary-color);
+            margin-bottom: 10px;
+        }
+
+        .logo {
+            width: 50px;
+            height: 50px;
+            vertical-align: middle;
+            margin-right: 10px;
+        }
+
+        .subreddit-info {
+            font-size: 1.1rem;
+            color: var(--meta-color);
+        }
+
+        .loading {
+            text-align: center;
+            padding: 30px;
+            font-size: 1.2rem;
+        }
+
+        .error {
+            color: #d32f2f;
+            background-color: #ffebee;
+            padding: 15px;
+            border-radius: 5px;
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .posts-container {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 20px;
+        }
+
+        .post {
+            background-color: var(--card-color);
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .post:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .post-title {
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: var(--secondary-color);
+            margin-bottom: 10px;
+            line-height: 1.4;
+        }
+
+        .post-meta {
+            font-size: 0.9rem;
+            color: var(--meta-color);
+            margin-bottom: 15px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .post-meta a {
+            color: var(--meta-color);
+            text-decoration: none;
+        }
+
+        .post-meta a:hover {
+            color: var(--primary-color);
+            text-decoration: underline;
+        }
+
+        .post-content {
+            margin: 15px 0;
+        }
+
+        .post-content img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 5px;
+            margin-top: 10px;
+        }
+
+        .post-content p {
+            margin: 10px 0;
+        }
+
+        .post-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 15px;
+            padding-top: 10px;
+            border-top: 1px solid #eee;
+            font-size: 0.9rem;
+        }
+
+        .post-link, .comments-link {
+            color: var(--primary-color);
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .post-link:hover, .comments-link:hover {
+            text-decoration: underline;
+        }
+
+        .post-date {
+            color: var(--meta-color);
+            font-size: 0.85rem;
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid #ddd;
+            color: var(--meta-color);
+            font-size: 0.9rem;
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 15px;
+            }
+            
+            .post {
+                padding: 15px;
+            }
+            
+            .post-title {
+                font-size: 1.1rem;
+            }
+        }
+    </style>
 </head>
 <body>
-  <h1>📢 Reddit Feed @genshinimpact</h1>
-  <div id="feed">Memuat postingan...</div>
+    <header>
+        <h1>
+            <img src="https://b.thumbs.redditmedia.com/EndDxMGB-FTZ2MGtjepQ06cQEkZw_YQAsOUudpb9nSQ.png" alt="Reddit logo" class="logo">
+            Genshin Impact Reddit Feed
+        </h1>
+        <div class="subreddit-info">
+            Latest posts from <a href="https://www.reddit.com/r/Genshin_Impact" target="_blank">r/Genshin_Impact</a>
+        </div>
+    </header>
 
-  <script>
-    async function loadFeed() {
-      //const url = "https://api.codetabs.com/v1/proxy?quest=https://www.reddit.com/user/genshinimpact/.rss";
-const url = "https://api-weld-kappa.vercel.app/api/reddit-rss"; 
-      try {
-        const res = await fetch(url);
-        const text = await res.text();
-        const parser = new DOMParser();
-        const xml = parser.parseFromString(text, "application/xml");
+    <div id="loading" class="loading">
+        <i class="fas fa-spinner fa-spin"></i> Loading posts...
+    </div>
 
-        const entries = xml.querySelectorAll("entry");
-        const container = document.getElementById("feed");
-        container.innerHTML = "";
+    <div id="error" class="error" style="display: none;"></div>
 
-        entries.forEach(entry => {
-          const title = entry.querySelector("title")?.textContent;
-          const link = entry.querySelector("link")?.getAttribute("href");
-          const content = entry.querySelector("content")?.textContent;
-          const published = entry.querySelector("published")?.textContent;
+    <div id="posts-container" class="posts-container"></div>
 
-          const imgMatch = content?.match(/<img[^>]+src="([^"]+)"/);
-          const image = imgMatch ? imgMatch[1].replace(/&amp;/g, "&") : null;
+    <footer>
+        <p>Data fetched from Reddit via API | &copy; 2025 Genshin Impact Feed</p>
+    </footer>
 
-          const div = document.createElement("div");
-          div.className = "post";
-          div.innerHTML = `
-            <h2><a href="${link}" target="_blank">${title}</a></h2>
-            ${image ? `<img src="${image}" alt="Gambar">` : ""}
-            <p><small>🕓 ${new Date(published).toLocaleString('id-ID')}</small></p>
-          `;
-          container.appendChild(div);
+    <script>
+        document.addEventListener('DOMContentLoaded', async function() {
+            const loadingElement = document.getElementById('loading');
+            const errorElement = document.getElementById('error');
+            const postsContainer = document.getElementById('posts-container');
+            
+            try {
+                // Fetch data from API
+                const response = await fetch('https://api-weld-kappa.vercel.app/api/reddit-rss');
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                
+                // Hide loading indicator
+                loadingElement.style.display = 'none';
+                
+                // Check if data exists and has entries
+                if (!data || !data.feed || !data.feed.entry) {
+                    throw new Error('No posts found in the API response');
+                }
+                
+                // Display posts
+                data.feed.entry.forEach(post => {
+                    const postElement = document.createElement('article');
+                    postElement.className = 'post';
+                    
+                    // Extract content safely
+                    let content = '';
+                    try {
+                        if (post.content && post.content['#text']) {
+                            content = post.content['#text'];
+                        } else if (post.content) {
+                            content = post.content;
+                        }
+                    } catch (e) {
+                        console.warn('Error parsing content:', e);
+                        content = '';
+                    }
+                    
+                    // Extract thumbnail/image
+                    let thumbnail = '';
+                    try {
+                        if (post['media:thumbnail'] && post['media:thumbnail']['@url']) {
+                            thumbnail = post['media:thumbnail']['@url'];
+                        }
+                    } catch (e) {
+                        console.warn('Error parsing thumbnail:', e);
+                    }
+                    
+                    // Create HTML for the post
+                    postElement.innerHTML = `
+                        <h2 class="post-title">
+                            <a href="${post.link['@href']}" target="_blank" rel="noopener noreferrer">${post.title}</a>
+                        </h2>
+                        <div class="post-meta">
+                            <span>Posted by <a href="${post.author.uri}" target="_blank">${post.author.name}</a></span>
+                            <span>in <a href="https://www.reddit.com/${post.category['@term']}" target="_blank">${post.category['@label']}</a></span>
+                        </div>
+                        <div class="post-content">
+                            ${content}
+                            ${thumbnail ? `<img src="${thumbnail}" alt="Post thumbnail">` : ''}
+                        </div>
+                        <div class="post-footer">
+                            <a href="${post.link['@href']}" class="post-link" target="_blank">View Post</a>
+                            <a href="${post.link['@href']}" class="comments-link" target="_blank">View Comments</a>
+                            <span class="post-date">${formatDate(post.updated)}</span>
+                        </div>
+                    `;
+                    
+                    postsContainer.appendChild(postElement);
+                });
+                
+            } catch (error) {
+                console.error('Error:', error);
+                loadingElement.style.display = 'none';
+                errorElement.style.display = 'block';
+                errorElement.textContent = `Error loading posts: ${error.message}`;
+            }
         });
 
-        if (entries.length === 0) {
-          container.innerHTML = "Tidak ada postingan Reddit ditemukan.";
+        function formatDate(dateString) {
+            try {
+                const date = new Date(dateString);
+                return date.toLocaleDateString('en-US', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+            } catch (e) {
+                console.warn('Error formatting date:', e);
+                return dateString;
+            }
         }
-      } catch (err) {
-        console.error("Gagal memuat RSS Reddit:", err);
-        document.getElementById("feed").innerText = "❌ Gagal memuat Reddit Feed.";
-      }
-    }
-
-    loadFeed();
-  </script>
+    </script>
 </body>
 </html>

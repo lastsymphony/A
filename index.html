@@ -12,6 +12,7 @@
             padding: 20px;
             background-color: #f5f5f5;
             color: #333;
+            line-height: 1.6;
         }
         header {
             display: flex;
@@ -59,7 +60,10 @@
         }
         .post-content {
             margin-bottom: 15px;
-            line-height: 1.5;
+        }
+        .post-content img {
+            max-width: 100%;
+            height: auto;
         }
         .post-link {
             color: #3498db;
@@ -73,10 +77,34 @@
             margin-top: 10px;
             color: #e74c3c;
             font-weight: bold;
+            text-decoration: none;
         }
         .timestamp {
             font-size: 0.8em;
             color: #95a5a6;
+        }
+        .loading {
+            text-align: center;
+            padding: 20px;
+            font-style: italic;
+            color: #7f8c8d;
+        }
+        .error {
+            color: #e74c3c;
+            padding: 20px;
+            text-align: center;
+        }
+        .refresh-btn {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-bottom: 20px;
+        }
+        .refresh-btn:hover {
+            background-color: #2980b9;
         }
     </style>
 </head>
@@ -89,42 +117,97 @@
         </div>
     </header>
 
-    <main>
-        <!-- Post 1 -->
-        <article class="post">
-            <h2 class="post-title">The special program for Genshin Impact's new version will premiere on the official Twitch and YouTube channels on 18/7/2025 at 08:00 AM (UTC-4)!</h2>
-            <div class="post-meta">
-                Posted by <a href="https://www.reddit.com/user/genshinimpact" class="post-link">/u/genshinimpact</a> 
-                in <a href="https://www.reddit.com/r/Genshin_Impact/" class="post-link">r/Genshin_Impact</a>
-                <span class="timestamp"> - 16/7/2025</span>
-            </div>
-            <img src="https://external-preview.redd.it/d25wMWY3NGZtNWRmMWmwDPtNHWvPhFSeC_5mRzHzm-oaJqnJaLZhyxNs-UBW.png?width=640&crop=smart&auto=webp&s=963bdff0708b94497c8b9c6ba2bf79616f0801c1" alt="Special Program Announcement" class="post-image">
-            <div class="post-content">
-                <p>The special program for Genshin Impact's new version will premiere soon!</p>
-            </div>
-            <a href="https://www.reddit.com/r/Genshin_Impact/comments/1m12vl0/the_special_program_for_genshin_impacts_new/" class="comments-link">View Comments</a>
-        </article>
+    <button class="refresh-btn" onclick="fetchFeed()">Refresh Feed</button>
+    
+    <div id="feed-container">
+        <div class="loading">Loading posts...</div>
+    </div>
 
-        <!-- Post 2 -->
-        <article class="post">
-            <h2 class="post-title">Version Update Announcement</h2>
-            <div class="post-meta">
-                Posted by <a href="https://www.reddit.com/user/genshinimpact" class="post-link">/u/genshinimpact</a> 
-                in <a href="https://www.reddit.com/r/Genshin_Impact/" class="post-link">r/Genshin_Impact</a>
-                <span class="timestamp"> - 16/7/2025</span>
-            </div>
-            <div class="post-content">
-                <p>Dear Traveler, it's announcement time!</p>
-                <p>The special program for Genshin Impact's new version will premiere on the official Twitch and YouTube channels on <strong>18/7/2025 at 08:00 AM</strong> (UTC-4).</p>
-                <p>Stay tuned for exciting new content and features!</p>
-            </div>
-            <a href="https://www.reddit.com/r/Genshin_Impact/comments/1m12vl0/the_special_program_for_genshin_impacts_new/" class="comments-link">View Comments</a>
-        </article>
-    </main>
-
-    <footer>
-        <p>Data fetched from: <a href="https://www.reddit.com/user/genshinimpact/.rss" class="post-link">Genshin Impact Reddit RSS Feed</a></p>
-        <p>Last updated: <span class="timestamp">16/7/2025 08:35 AM UTC</span></p>
-    </footer>
+    <script>
+        // Function to fetch and parse the RSS feed
+        async function fetchFeed() {
+            const container = document.getElementById('feed-container');
+            container.innerHTML = '<div class="loading">Loading posts...</div>';
+            
+            try {
+                // Use a CORS proxy to avoid CORS issues
+                const proxyUrl = 'https://api.allorigins.win/get?url=';
+                const targetUrl = encodeURIComponent('https://www.reddit.com/user/genshinimpact/.rss');
+                
+                const response = await fetch(proxyUrl + targetUrl);
+                const data = await response.json();
+                
+                if (data.contents) {
+                    const parser = new DOMParser();
+                    const xmlDoc = parser.parseFromString(data.contents, "text/xml");
+                    
+                    // Extract feed information
+                    const feedTitle = xmlDoc.querySelector('title').textContent;
+                    const feedSubtitle = xmlDoc.querySelector('subtitle').textContent;
+                    const entries = xmlDoc.querySelectorAll('entry');
+                    
+                    // Update header with feed info
+                    document.querySelector('h1').textContent = feedTitle;
+                    document.querySelector('.subtitle').textContent = feedSubtitle;
+                    
+                    // Process and display entries
+                    let html = '';
+                    entries.forEach(entry => {
+                        const title = entry.querySelector('title').textContent;
+                        const author = entry.querySelector('author name').textContent;
+                        const authorUri = entry.querySelector('author uri').textContent;
+                        const category = entry.querySelector('category').getAttribute('label');
+                        const content = entry.querySelector('content').textContent;
+                        const link = entry.querySelector('link').getAttribute('href');
+                        const updated = new Date(entry.querySelector('updated').textContent).toLocaleString();
+                        const thumbnail = entry.querySelector('media\\:thumbnail')?.getAttribute('url') || '';
+                        
+                        // Create HTML for the post
+                        html += `
+                            <article class="post">
+                                <h2 class="post-title">${title}</h2>
+                                <div class="post-meta">
+                                    Posted by <a href="${authorUri}" class="post-link">${author}</a> 
+                                    in <span class="post-link">${category}</span>
+                                    <span class="timestamp"> - ${updated}</span>
+                                </div>
+                                ${thumbnail ? `<img src="${thumbnail}" class="post-image" alt="${title}">` : ''}
+                                <div class="post-content">${formatContent(content)}</div>
+                                <a href="${link}" class="comments-link">View Post & Comments</a>
+                            </article>
+                        `;
+                    });
+                    
+                    container.innerHTML = html;
+                } else {
+                    container.innerHTML = '<div class="error">Error loading feed. Please try again later.</div>';
+                }
+            } catch (error) {
+                console.error('Error fetching feed:', error);
+                container.innerHTML = '<div class="error">Error loading feed. Please try again later.</div>';
+            }
+        }
+        
+        // Function to format content (basic HTML sanitization and formatting)
+        function formatContent(content) {
+            // Simple HTML sanitization (in a real app, use a proper sanitizer library)
+            let formatted = content
+                .replace(/&lt;/g, '<')
+                .replace(/&gt;/g, '>')
+                .replace(/&amp;/g, '&')
+                .replace(/&quot;/g, '"')
+                .replace(/&#39;/g, "'")
+                .replace(/&nbsp;/g, ' ');
+            
+            // Basic formatting for Reddit's HTML
+            formatted = formatted.replace(/<a href="([^"]+)">([^<]+)<\/a>/g, '<a href="$1" class="post-link">$2</a>');
+            formatted = formatted.replace(/<strong>([^<]+)<\/strong>/g, '<strong>$1</strong>');
+            
+            return formatted;
+        }
+        
+        // Load the feed when the page loads
+        document.addEventListener('DOMContentLoaded', fetchFeed);
+    </script>
 </body>
-</html> 
+</html>

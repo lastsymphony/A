@@ -1,213 +1,53 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="id">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Genshin Impact Reddit Feed</title>
-    <style>
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 20px;
-            background-color: #f5f5f5;
-            color: #333;
-            line-height: 1.6;
-        }
-        header {
-            display: flex;
-            align-items: center;
-            margin-bottom: 30px;
-            padding-bottom: 15px;
-            border-bottom: 1px solid #ddd;
-        }
-        .logo {
-            width: 50px;
-            height: 50px;
-            margin-right: 15px;
-        }
-        h1 {
-            margin: 0;
-            color: #e74c3c;
-        }
-        .subtitle {
-            color: #777;
-            font-style: italic;
-            margin-top: 5px;
-        }
-        .post {
-            background-color: white;
-            border-radius: 8px;
-            padding: 20px;
-            margin-bottom: 20px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-        .post-title {
-            font-size: 1.2em;
-            font-weight: bold;
-            margin-bottom: 10px;
-            color: #2c3e50;
-        }
-        .post-image {
-            max-width: 100%;
-            border-radius: 4px;
-            margin-bottom: 10px;
-        }
-        .post-meta {
-            font-size: 0.9em;
-            color: #7f8c8d;
-            margin-bottom: 10px;
-        }
-        .post-content {
-            margin-bottom: 15px;
-        }
-        .post-content img {
-            max-width: 100%;
-            height: auto;
-        }
-        .post-link {
-            color: #3498db;
-            text-decoration: none;
-        }
-        .post-link:hover {
-            text-decoration: underline;
-        }
-        .comments-link {
-            display: inline-block;
-            margin-top: 10px;
-            color: #e74c3c;
-            font-weight: bold;
-            text-decoration: none;
-        }
-        .timestamp {
-            font-size: 0.8em;
-            color: #95a5a6;
-        }
-        .loading {
-            text-align: center;
-            padding: 20px;
-            font-style: italic;
-            color: #7f8c8d;
-        }
-        .error {
-            color: #e74c3c;
-            padding: 20px;
-            text-align: center;
-        }
-        .refresh-btn {
-            background-color: #3498db;
-            color: white;
-            border: none;
-            padding: 8px 16px;
-            border-radius: 4px;
-            cursor: pointer;
-            margin-bottom: 20px;
-        }
-        .refresh-btn:hover {
-            background-color: #2980b9;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <title>Reddit Post Genshin Impact</title>
+  <style>
+    body { font-family: sans-serif; background: #f9f9f9; padding: 1rem; max-width: 800px; margin: auto; }
+    .post { background: white; padding: 1rem; margin: 1rem 0; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+    .post img { width: 100%; border-radius: 6px; margin-top: 10px; }
+    h2 { font-size: 18px; }
+  </style>
 </head>
 <body>
-    <header>
-        <img src="https://www.redditstatic.com/icon.png" alt="Reddit Logo" class="logo">
-        <div>
-            <h1>Genshin Impact Reddit Feed</h1>
-            <div class="subtitle">Official Reddit account for Genshin Impact</div>
-        </div>
-    </header>
+  <h1>📢 Reddit Feed @genshinimpact</h1>
+  <div id="feed">Memuat...</div>
 
-    <button class="refresh-btn" onclick="fetchFeed()">Refresh Feed</button>
-    
-    <div id="feed-container">
-        <div class="loading">Loading posts...</div>
-    </div>
+  <script>
+    async function loadFeed() {
+      const proxy = "https://api.allorigins.win/get?url=";
+      const target = encodeURIComponent("https://www.reddit.com/user/genshinimpact/.rss");
+      const res = await fetch(proxy + target);
+      const data = await res.json();
+      const xml = new DOMParser().parseFromString(data.contents, "application/xml");
 
-    <script>
-        // Function to fetch and parse the RSS feed
-        async function fetchFeed() {
-            const container = document.getElementById('feed-container');
-            container.innerHTML = '<div class="loading">Loading posts...</div>';
-            
-            try {
-                // Use a CORS proxy to avoid CORS issues
-                const proxyUrl = 'https://api.allorigins.win/get?url=';
-                const targetUrl = encodeURIComponent('https://www.reddit.com/user/genshinimpact/.rss');
-                
-                const response = await fetch(proxyUrl + targetUrl);
-                const data = await response.json();
-                
-                if (data.contents) {
-                    const parser = new DOMParser();
-                    const xmlDoc = parser.parseFromString(data.contents, "text/xml");
-                    
-                    // Extract feed information
-                    const feedTitle = xmlDoc.querySelector('title').textContent;
-                    const feedSubtitle = xmlDoc.querySelector('subtitle').textContent;
-                    const entries = xmlDoc.querySelectorAll('entry');
-                    
-                    // Update header with feed info
-                    document.querySelector('h1').textContent = feedTitle;
-                    document.querySelector('.subtitle').textContent = feedSubtitle;
-                    
-                    // Process and display entries
-                    let html = '';
-                    entries.forEach(entry => {
-                        const title = entry.querySelector('title').textContent;
-                        const author = entry.querySelector('author name').textContent;
-                        const authorUri = entry.querySelector('author uri').textContent;
-                        const category = entry.querySelector('category').getAttribute('label');
-                        const content = entry.querySelector('content').textContent;
-                        const link = entry.querySelector('link').getAttribute('href');
-                        const updated = new Date(entry.querySelector('updated').textContent).toLocaleString();
-                        const thumbnail = entry.querySelector('media\\:thumbnail')?.getAttribute('url') || '';
-                        
-                        // Create HTML for the post
-                        html += `
-                            <article class="post">
-                                <h2 class="post-title">${title}</h2>
-                                <div class="post-meta">
-                                    Posted by <a href="${authorUri}" class="post-link">${author}</a> 
-                                    in <span class="post-link">${category}</span>
-                                    <span class="timestamp"> - ${updated}</span>
-                                </div>
-                                ${thumbnail ? `<img src="${thumbnail}" class="post-image" alt="${title}">` : ''}
-                                <div class="post-content">${formatContent(content)}</div>
-                                <a href="${link}" class="comments-link">View Post & Comments</a>
-                            </article>
-                        `;
-                    });
-                    
-                    container.innerHTML = html;
-                } else {
-                    container.innerHTML = '<div class="error">Error loading feed. Please try again later.</div>';
-                }
-            } catch (error) {
-                console.error('Error fetching feed:', error);
-                container.innerHTML = '<div class="error">Error loading feed. Please try again later.</div>';
-            }
-        }
-        
-        // Function to format content (basic HTML sanitization and formatting)
-        function formatContent(content) {
-            // Simple HTML sanitization (in a real app, use a proper sanitizer library)
-            let formatted = content
-                .replace(/&lt;/g, '<')
-                .replace(/&gt;/g, '>')
-                .replace(/&amp;/g, '&')
-                .replace(/&quot;/g, '"')
-                .replace(/&#39;/g, "'")
-                .replace(/&nbsp;/g, ' ');
-            
-            // Basic formatting for Reddit's HTML
-            formatted = formatted.replace(/<a href="([^"]+)">([^<]+)<\/a>/g, '<a href="$1" class="post-link">$2</a>');
-            formatted = formatted.replace(/<strong>([^<]+)<\/strong>/g, '<strong>$1</strong>');
-            
-            return formatted;
-        }
-        
-        // Load the feed when the page loads
-        document.addEventListener('DOMContentLoaded', fetchFeed);
-    </script>
+      const entries = xml.querySelectorAll("entry");
+      const container = document.getElementById("feed");
+      container.innerHTML = "";
+
+      entries.forEach(entry => {
+        const title = entry.querySelector("title")?.textContent;
+        const link = entry.querySelector("link")?.getAttribute("href");
+        const content = entry.querySelector("content")?.textContent;
+        const published = entry.querySelector("published")?.textContent;
+
+        // cari gambar
+        const imgMatch = content.match(/<img[^>]+src="([^"]+)"/);
+        const image = imgMatch ? imgMatch[1].replace(/&amp;/g, '&') : null;
+
+        const post = document.createElement("div");
+        post.className = "post";
+        post.innerHTML = `
+          <h2><a href="${link}" target="_blank">${title}</a></h2>
+          ${image ? `<img src="${image}" alt="Thumbnail">` : ""}
+          <p><small>🕒 ${new Date(published).toLocaleString()}</small></p>
+        `;
+        container.appendChild(post);
+      });
+    }
+
+    loadFeed();
+  </script>
 </body>
 </html>

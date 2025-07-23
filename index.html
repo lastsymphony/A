@@ -2,7 +2,7 @@
 <html lang="id">
 <head>
   <meta charset="UTF-8" />
-  <title>Chat AI Multi Karakter</title>
+  <title>Web Chat AI - Multi Karakter</title>
   <style>
     body {
       font-family: sans-serif;
@@ -50,7 +50,6 @@
 
   <script>
     let characters = {};
-    let history = [];
 
     async function loadCharacters() {
       const res = await fetch('./characters.json');
@@ -74,16 +73,18 @@
       if (!message) return;
 
       const prompt = `${persona}\n\nUser: ${message}`;
-      const encodedPrompt = encodeURIComponent(prompt);
-
       chat.innerHTML += `<div class="user">🧑 Kamu: ${message}</div>`;
       input.value = '';
       input.disabled = true;
 
       try {
-        const res = await fetch(`https://www.laurine.site/api/ai/gptonline?query=${encodedPrompt}`, {
-          method: 'GET',
-          headers: { 'Accept': '*/*' }
+        const res = await fetch('https://apihoyolab.vercel.app/api/chat', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': '*/*'
+          },
+          body: JSON.stringify({ content: prompt })
         });
 
         const json = await res.json();

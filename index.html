@@ -2,7 +2,7 @@
 <html lang="id">
 <head>
   <meta charset="UTF-8" />
-  <title>Web Chat AI - Multi Karakter</title>
+  <title>Web Chat AI Ceria</title>
   <style>
     body {
       font-family: sans-serif;
@@ -25,22 +25,19 @@
       background: #f9f9f9;
     }
 
-    .user {
-      color: #0056b3;
-      margin-bottom: 0.5rem;
-    }
-
-    .ai {
-      color: #000;
-      margin-bottom: 1rem;
-    }
+    .user { color: #0056b3; margin-bottom: 0.5rem; }
+    .ai { color: #000; margin-bottom: 1rem; }
   </style>
 </head>
 <body>
-  <h1>Chat AI Multi Karakter</h1>
+  <h1>Chat AI Ceria - Multi Karakter</h1>
 
   <label for="character">Pilih Karakter:</label>
-  <select id="character"></select>
+  <select id="character">
+    <option value="ceria">AI Ceria</option>
+    <option value="guru">Guru Bijak</option>
+    <option value="robot">Robot Profesional</option>
+  </select>
 
   <label for="message">Pesan:</label>
   <input type="text" id="message" placeholder="Tulis pesan kamu..." />
@@ -49,42 +46,36 @@
   <div class="chat-box" id="chat"></div>
 
   <script>
-    let characters = {};
-
-    async function loadCharacters() {
-      const res = await fetch('./characters.json');
-      const data = await res.json();
-      const select = document.getElementById('character');
-      data.forEach(char => {
-        characters[char.id] = char.persona;
-        const option = document.createElement('option');
-        option.value = char.id;
-        option.textContent = char.name;
-        select.appendChild(option);
-      });
-    }
+    const systemPrompts = {
+      ceria: "kamu adalah ai yang ceria",
+      guru: "kamu adalah guru bijak yang menjelaskan dengan tenang dan jelas",
+      robot: "kamu adalah AI robot profesional dan to-the-point"
+    };
 
     async function sendMessage() {
       const input = document.getElementById('message');
       const chat = document.getElementById('chat');
-      const selected = document.getElementById('character').value;
-      const persona = characters[selected];
-      const message = input.value.trim();
-      if (!message) return;
+      const char = document.getElementById('character').value;
+      const userMsg = input.value.trim();
+      if (!userMsg) return;
 
-      const prompt = `${persona}\n\nUser: ${message}`;
-      chat.innerHTML += `<div class="user">🧑 Kamu: ${message}</div>`;
+      chat.innerHTML += `<div class="user">🧑 Kamu: ${userMsg}</div>`;
       input.value = '';
       input.disabled = true;
 
+      const payload = [
+        { role: "system", content: systemPrompts[char] },
+        { role: "user", content: userMsg }
+      ];
+
       try {
-        const res = await fetch('https://apihoyolab.vercel.app/api/chat', {
+        const res = await fetch('https://api.siputzx.my.id/api/ai/gpt3', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
             'Accept': '*/*'
           },
-          body: JSON.stringify({ content: prompt })
+          body: JSON.stringify(payload)
         });
 
         const json = await res.json();
@@ -98,8 +89,6 @@
       input.disabled = false;
       input.focus();
     }
-
-    loadCharacters();
   </script>
 </body>
 </html>
